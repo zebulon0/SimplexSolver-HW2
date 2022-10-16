@@ -26,8 +26,7 @@ def normalizeMatrix(matrix):
 def getMatrix():
     while True:
         print("Welcome to the Simplex solver!")
-        # matrixFile = input("Enter a text file with your matrix to solve >")
-        matrixFile = "game3-1.txt"
+        matrixFile = input("Enter a text file with your matrix to solve >")
         if matrixFile.endswith(".txt"):
             G = []
             with open(matrixFile) as f:
@@ -63,7 +62,6 @@ def printMatrix(m):
         outString = ""
         for j in range(len(m[0])):
             outString += f'{m[i][j].limit_denominator().__str__(): >7}\t'
-
         print(outString)
 
 
@@ -135,9 +133,9 @@ def createIdentityMatrix(m):
 
 def findPivot(matrix):
     """
-    **When there is no negative value in the bottom row, the game is over**
+    When there is no negative value in the bottom row, the game is over
     :param matrix:
-    :return:
+    :return: pivotRow, pivotCol, gameOver
     """
     # find pivot column
     lastRow = matrix[-1][:-1]  # grab last row and remove last column
@@ -163,7 +161,6 @@ def findPivot(matrix):
 
     print(f'\n{matrix[pivotRow][pivotCol]} is the pivot found at ({pivotRow},{pivotCol})')
     print("\n----------------------------------------------\n")
-
     return pivotRow, pivotCol, False
 
 
@@ -199,7 +196,9 @@ def calcNextTableau(tableau, pivotRow, pivotCol, counter):
 
 if __name__ == '__main__':
     solved = False
-    game = getMatrix()
+    game = getMatrix()  # get matrix from user
+
+    # create the first tableau
     tab = makeTableau(game, len(game), len(game[0]))
 
     cntr = 2
@@ -208,20 +207,3 @@ if __name__ == '__main__':
         if not solved:
             tab = calcNextTableau(tab, r, c, cntr)
             cntr += 1
-        if cntr >= 11:
-            break
-
-    # TODO: write function for printing out the final values of the game
-    #       1) print value of the game
-    #           - max value V is in bottom right corner of last tab
-    #           - V = 1/value_of_game
-    #           - x variables are the far right values above the last row
-    #           - y variables are the last row in the Im columns
-    #       2) print mixed strategies for both players
-    #           - x1 = ?, x2 = ?, x3 ...
-    #           - y1 = ?, y2 = ?, y3 ...
-
-    # TODO: Add case where game ends when number of tableaus
-    #       is equal to the number of rows in the OG tableau
-    #       ** See game2.txt for testing
-    #       *** probably isn't needed because the game should end organically
