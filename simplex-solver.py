@@ -9,18 +9,18 @@ def normalizeMatrix(matrix):
             if element < minVal:
                 minVal = element
     if minVal <= 0:
-        normVal = abs(minVal) + 1
+        k = abs(minVal) + 1
         for row in range(len(matrix)):
             for col in range(len(matrix[0])):
-                matrix[row][col] += normVal
+                matrix[row][col] += k
 
         print("\n\tThe normalized game matrix is:\n")
         printMatrix(matrix)
         print("\n----------------------------------------------\n")
-        return matrix
+        return k, matrix
 
     else:
-        return matrix
+        return 0, matrix
 
 
 def getMatrix():
@@ -53,8 +53,8 @@ def getMatrix():
     print("\n\tThe matrix you entered was:\n")
     printMatrix(G)
     print("\n----------------------------------------------\n")
-    G = normalizeMatrix(G)
-    return G
+    k, G = normalizeMatrix(G)
+    return k, G
 
 
 def printMatrix(m):
@@ -193,10 +193,58 @@ def calcNextTableau(tableau, pivotRow, pivotCol, counter):
     printMatrix(newTableau)
     return newTableau
 
+def calculateValueandOptimalStrategiesforGameandPrintOut(tab, k, m, n):
+    rows = len(tab)
+    cols = len(tab[0])
+    # calculate the value of the game - v = 1/V - k
+    # where v is the value of the game,
+    # V is the value in the bottom right corner of the tableau
+    # and k is the constant we defined when normalizing the matrix
+    v = tab[rows-1][cols-1]
+    value = fractions.Fraction(1/v - k)
+    # -------------------------------------------------------------
+    print("Value of the game:", value)
+    # calculate the optimal strategy for player 1
+    # pj=yj/V,j = 1 ...,m where pj is a strategy
+    # and yj takes the value at the bottom of the tableau
+    # in the corresponding slack variable column j
+    ply1opt = []
+    for i in range(n, cols-1):
+        ply1opt.append(fractions.Fraction((tab[rows-1][i])/v))
+    # end="" used for formatting
+    print("An Optimal Strategy for Player 1: (", end="")
+    print(*ply1opt, sep=", ", end="")
+    print(")")
+    # calculate the optimal strategy for player 2
+    # qi=xi/V, i = 1 ...,n where qi is a strategy
+    # and xi takes the value on the far right of the tableau
+    # in the corresponding row with 1 in the xi column
+    # if the xi column does not have one 1 and the rest of it is 0s
+    # then that corresponding qi is 0
+    ply2opt = []
+    for i in range(0, n):
+        xcol = []
+        for j in range(0, rows):
+            xcol.append(tab[j][i])
+        # this makes sure xi has one 1 and the rest of it is 0s
+        if xcol.count(0) != rows - 1 or xcol.count(1) != 1:
+            ply2opt.append(0)
+        # this finds the far right value corresponding with xi's 1
+        # and does the xi/V calculation
+        else:
+            farrightrowindex = xcol.index(1)
+            farright = tab[farrightrowindex][cols-1]
+            ply2opt.append(fractions.Fraction(farright/v))
+    print("An Optimal Strategy for Player 2: (", end="")
+    print(*ply2opt, sep=", ", end="")
+    print(")")
+
 
 if __name__ == '__main__':
     solved = False
-    game = getMatrix()  # get matrix from user
+    k, game = getMatrix()  # get matrix from user and k used to normalize it
+    m = len(game)  # m is the number of rows in the original game
+    n = len(game[0])  # n is the number of cols in the original game
 
     # create the first tableau
     tab = makeTableau(game, len(game), len(game[0]))
@@ -207,3 +255,7 @@ if __name__ == '__main__':
         if not solved:
             tab = calcNextTableau(tab, r, c, cntr)
             cntr += 1
+
+    # now that the game has been solved, do the calculations
+    print()  # make a new line before doing calculations
+    calculateValueandOptimalStrategiesforGameandPrintOut(tab, k, m, n)
